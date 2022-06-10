@@ -13,8 +13,10 @@ import {
   UserPoolServiceFactory,
 } from "./userPoolService";
 import fs from "fs/promises";
+import { UserPoolDomain } from "./userPoolDomain";
 
 const CLIENTS_DATABASE_NAME = "clients";
+const DOMAINS_DATABASE_NAME = "domains";
 
 // These defaults were pulled from Cognito on 2021-11-26 by creating a new User Pool with only a Name and
 // capturing what defaults Cognito set on the pool.
@@ -264,6 +266,7 @@ export interface CognitoService {
   createUserPool(ctx: Context, userPool: UserPool): Promise<UserPool>;
   deleteUserPool(ctx: Context, userPool: UserPool): Promise<void>;
   getAppClient(ctx: Context, clientId: string): Promise<AppClient | null>;
+  getUserPoolDomain(ctx: Context, domain: string): Promise<UserPoolDomain | null>;
   getUserPool(ctx: Context, userPoolId: string): Promise<UserPoolService>;
   getUserPoolForClientId(
     ctx: Context,
@@ -285,6 +288,7 @@ export interface CognitoServiceFactory {
 
 export class CognitoServiceImpl implements CognitoService {
   private readonly clients: DataStore;
+  private readonly domains: DataStore;
   private readonly clock: Clock;
   private readonly userPoolServiceFactory: UserPoolServiceFactory;
   private readonly dataDirectory: string;
@@ -293,11 +297,13 @@ export class CognitoServiceImpl implements CognitoService {
   public constructor(
     dataDirectory: string,
     clients: DataStore,
+    domains: DataStore,
     clock: Clock,
     userPoolDefaultConfig: UserPoolDefaults,
     userPoolServiceFactory: UserPoolServiceFactory
   ) {
     this.clients = clients;
+    this.domains = domains;
     this.clock = clock;
     this.dataDirectory = dataDirectory;
     this.userPoolDefaultConfig = userPoolDefaultConfig;
@@ -312,6 +318,7 @@ export class CognitoServiceImpl implements CognitoService {
     const service = await this.userPoolServiceFactory.create(
       ctx,
       this.clients,
+      this.domains,
       mergeWith(
         {},
         USER_POOL_AWS_DEFAULTS,
@@ -336,7 +343,7 @@ export class CognitoServiceImpl implements CognitoService {
     userPoolId: string
   ): Promise<UserPoolService> {
     ctx.logger.debug({ userPoolId }, "CognitoServiceImpl.getUserPool");
-    return this.userPoolServiceFactory.create(ctx, this.clients, {
+    return this.userPoolServiceFactory.create(ctx, this.clients, this.domains, {
       ...USER_POOL_AWS_DEFAULTS,
       ...this.userPoolDefaultConfig,
       Id: userPoolId,
@@ -353,7 +360,7 @@ export class CognitoServiceImpl implements CognitoService {
       throw new ResourceNotFoundError();
     }
 
-    return this.userPoolServiceFactory.create(ctx, this.clients, {
+    return this.userPoolServiceFactory.create(ctx, this.clients, this.domains, {
       ...USER_POOL_AWS_DEFAULTS,
       ...this.userPoolDefaultConfig,
       Id: appClient.UserPoolId,
@@ -366,6 +373,14 @@ export class CognitoServiceImpl implements CognitoService {
   ): Promise<AppClient | null> {
     ctx.logger.debug({ clientId }, "CognitoServiceImpl.getAppClient");
     return this.clients.get(ctx, ["Clients", clientId]);
+  }
+
+  public async getUserPoolDomain(
+    ctx: Context, 
+    domain: string
+  ): Promise<UserPoolDomain | null> {
+    ctx.logger.debug({ domain }, "CognitoServiceImpl.getUserPoolDomain");
+    return this.domains.get(ctx, ["Domains", domain]);
   }
 
   public async listAppClients(
@@ -437,9 +452,16 @@ export class CognitoServiceFactoryImpl implements CognitoServiceFactory {
       { Clients: {} }
     );
 
+    const domains = await this.dataStoreFactory.create(
+      ctx,
+      DOMAINS_DATABASE_NAME,
+      { Domains: {} }
+    );
+
     return new CognitoServiceImpl(
       this.dataDirectory,
       clients,
+      domains,
       this.clock,
       userPoolDefaultConfig,
       this.userPoolServiceFactory

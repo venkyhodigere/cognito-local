@@ -51,10 +51,13 @@ describe("Cognito Service", () => {
       mockUserPoolServiceFactory.create.mockResolvedValue(mockUserPool);
 
       const clientsDataStore = newMockDataStore();
+      
+      const domainsDataStore = newMockDataStore();
 
       const cognitoClient = new CognitoServiceImpl(
         "data-directory",
         clientsDataStore,
+        domainsDataStore,
         new ClockFake(new Date()),
         { UsernameAttributes: [] },
         mockUserPoolServiceFactory
@@ -65,6 +68,7 @@ describe("Cognito Service", () => {
       expect(mockUserPoolServiceFactory.create).toHaveBeenCalledWith(
         TestContext,
         clientsDataStore,
+        domainsDataStore,
         { ...USER_POOL_AWS_DEFAULTS, Id: "testing", UsernameAttributes: [] }
       );
       expect(userPool).toEqual(mockUserPool);
@@ -78,9 +82,12 @@ describe("Cognito Service", () => {
       const clientsDataStore = newMockDataStore();
       clientsDataStore.get.mockResolvedValue(null);
 
+      const domainsDataStore = newMockDataStore(); //TODO
+
       const cognitoClient = new CognitoServiceImpl(
         "data-directory",
         clientsDataStore,
+        domainsDataStore,
         new ClockFake(new Date()),
         { UsernameAttributes: [] },
         mockUserPoolServiceFactory
@@ -101,9 +108,12 @@ describe("Cognito Service", () => {
         UserPoolId: "userPoolId",
       });
 
+      const domainsDataStore = newMockDataStore(); //TODO
+
       const cognitoClient = new CognitoServiceImpl(
         "data-directory",
         clientsDataStore,
+        domainsDataStore,
         new ClockFake(new Date()),
         { UsernameAttributes: [] },
         mockUserPoolServiceFactory
@@ -121,6 +131,7 @@ describe("Cognito Service", () => {
       expect(mockUserPoolServiceFactory.create).toHaveBeenCalledWith(
         TestContext,
         clientsDataStore,
+        domainsDataStore,
         { ...USER_POOL_AWS_DEFAULTS, Id: "userPoolId", UsernameAttributes: [] }
       );
       expect(userPool).toEqual(mockUserPool);

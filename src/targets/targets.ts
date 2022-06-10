@@ -45,6 +45,9 @@ import { UpdateUserAttributes } from "./updateUserAttributes";
 import { UpdateUserPool } from "./updateUserPool";
 import { UpdateUserPoolClient } from "./updateUserPoolClient";
 import { VerifyUserAttribute } from "./verifyUserAttribute";
+import { CreateUserPoolDomain } from "./createUserPoolDomain";
+import { DeleteUserPoolDomain } from "./deleteUserPoolDomain";
+import { DescribeUserPoolDomain } from "./describeUserPoolDomain";
 
 export const Targets = {
   AddCustomAttributes,
@@ -67,13 +70,16 @@ export const Targets = {
   CreateGroup,
   CreateUserPool,
   CreateUserPoolClient,
+  CreateUserPoolDomain,
   DeleteGroup,
   DeleteUser,
   DeleteUserAttributes,
   DeleteUserPool,
   DeleteUserPoolClient,
+  DeleteUserPoolDomain,
   DescribeUserPool,
   DescribeUserPoolClient,
+  DescribeUserPoolDomain,
   ForgotPassword,
   GetGroup,
   GetUser,

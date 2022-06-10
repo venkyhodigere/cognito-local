@@ -208,7 +208,7 @@ export class UserPoolServiceImpl implements UserPoolService {
     ctx.logger.debug("UserPoolServiceImpl.saveUserPoolDomain");  //TODO: If the record already exists, throw an exception
     await this.domainsDataStore.set(
       ctx,
-      ["UserPoolDomains", userPoolDomain.Domain],
+      ["Domains", userPoolDomain.Domain],
       userPoolDomain
     );
     return userPoolDomain.Domain; //TODO: Try and emulate the fqdn domain logic for custom/aws domains
@@ -222,7 +222,7 @@ export class UserPoolServiceImpl implements UserPoolService {
       { userDomain: userPoolDomain.Domain },
       "UserPoolServiceImpl.deleteUserPoolDomain"
     );
-    await this.domainsDataStore.delete(ctx, ["UserPoolDomains", userPoolDomain.Domain]);
+    await this.domainsDataStore.delete(ctx, ["Domains", userPoolDomain.Domain]);
   }
 
   public async saveAppClient(

@@ -5,6 +5,7 @@ import {
 import { Services } from "../services";
 import { UserPoolDomain } from "../services/userPoolDomain";
 import { Target } from "./Target";
+import { DomainNotFoundError } from "../errors";
 
 export type DescribeUserPoolDomainTarget = Target<
     DescribeUserPoolDomainRequest, 
@@ -23,7 +24,7 @@ export const DescribeUserPoolDomain =
             const userPoolDomain: (UserPoolDomain|null) = await cognito.getUserPoolDomain(ctx, req.Domain);
 
             if(userPoolDomain === null) {
-                return null
+                throw new DomainNotFoundError();
             }
 
         return {

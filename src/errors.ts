@@ -84,5 +84,11 @@ export class InvalidLambdaResponseError extends CognitoError {
 export class InvalidParameterError extends CognitoError {
   public constructor(message = "Invalid parameter") {
     super("InvalidParameterException", message);
-  }
+  }  
+}
+
+export class DomainNotFoundError extends CognitoError {
+  public constructor(message = "User Pool Domain Not Found") {
+    super("DomainNotFoundException", message);
+  }  
 }

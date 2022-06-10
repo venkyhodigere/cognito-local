@@ -26,6 +26,6 @@ export const DeleteUserPoolDomain =
 
         await userPool.deleteUserPoolDomain(ctx, userPoolDomain);
 
-        return null;
+        return;
 };
   
